@@ -2,6 +2,11 @@ import openpyxl
 import PySimpleGUI as sg
 import os
 
+<<<<<<< HEAD
+=======
+# pyinstaller --onefile -w "b2b_diana.py" --windowed
+
+>>>>>>> caab72a (reacomodo de git local)
 '''
 > Obtener UUID por cada proveedor
 > Contar cuantos proveedores
