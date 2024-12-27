@@ -5,8 +5,11 @@ Función principal:
     acomodar_archivos
 
 Autor: Carlos Emilio Mejía Vázquez
-Fecha: 26/12/2024
-Versión: 0.1
+Fecha de creación: 26/12/2024
+Versión: 0.2
+
+Ultima modificación: 27/12/2024
+Cambio de versiones: 0.1 -> 0.2
 """
 
 import os
@@ -57,7 +60,7 @@ def obtener_archivo(no_gui:bool=False)->str:
     else:
         return os.path.normpath(path)
 
-def escanear_archivos(path:str=os.getcwd())->dict[str,list[str]]:
+def escanear_archivos(path:str)->dict[str,list[str]]:
     '''
     Escanea una ubicación y clasifica solo los archivos encontrados
 
@@ -70,32 +73,38 @@ def escanear_archivos(path:str=os.getcwd())->dict[str,list[str]]:
             - Valores :    Lista con las rutas de los archivos con extencion igual a la Clave
     '''
     archivos = [file for file in os.listdir(path) if os.path.isfile(os.path.join(path, file))]
-    directorios = [file for file in os.listdir(path) if not os.path.isfile(os.path.join(path, file))]
     extensiones = {}
     for archivo in archivos:
         name, extension = os.path.splitext(archivo)
-        extension = extension.replace(".", "")
+        # extension = extension.replace(".", "")
         try:
             extensiones[extension].append(os.path.normpath(os.path.join(path, archivo)))
         except KeyError:
             extensiones[extension]= [os.path.normpath(os.path.join(path, archivo))]
     return extensiones
 
-def crear_carpeta(nombre:str)->int:
+def crear_carpeta(ubicacion:str, nombre:str)->int:
     '''
     Crea carpetas ocupando CMD en Windows
 
     Args:
         nombre (str) :    El nombre de la carpeta que se va a crear
+        ubicacion (str):    La ubicación donde se va a crear la carpeta
 
     Returns :
         int: donde:
             - 0 :    No se creó la carpeta
             - 1 :    Se creó la carpeta
     '''
-    output = os.system(f"mkdir \"{nombre}\"")
-    if output == 0: return 1
-    else: return 0
+    folder_name = os.path.join(ubicacion, nombre)
+    if os.path.isdir(folder_name):
+        return 0
+    else:
+        output = os.system(f"mkdir \"{folder_name}\"")
+        if output == 0:
+            return 1
+        else:
+            return 0
 
 def mover_archivos(ubi_archivo:str, ubi_nueva:str)->int:
     '''
@@ -111,16 +120,24 @@ def mover_archivos(ubi_archivo:str, ubi_nueva:str)->int:
             - 1 :    Se movió el archivo.
     '''
     output = os.system(f'move \"{ubi_archivo}\" \"{ubi_nueva}\"')
-    if output == 0: return 1
-    else: return 0
+    if output == 0:
+        return 1
+    else:
+        return 0
 
 def acomodar_archivos(archivos:list[list[str]], extensiones:list[str], main_path:str):
-    for i, file_type in enumerate(archivos):
-        crear_carpeta(extensiones[i])
-        for archivo in archivos:
-            mover_archivos(ubi_archivo = archivo,ubi_nueva=os.path.join(main_path, extensiones[i]))
+    '''
+    Función principal del programa. Acomoda y clasifica los archivos de una ubicación en carpetas
 
-
+    Args:
+        archivos (list[list[str]]):    Es una lista de archivos almacenados por listas por tipo de archivos
+        extenciones (list[str]):    Es una lista de archivos que sirven para crear las carpetas
+        main_path (str):    es la ubicación seleccionada para escanear y clasificar los archivos
+    '''
+    for i, ext in enumerate(extensiones):
+        crear_carpeta(main_path, ext)
+        for arch in archivos[i]:
+            mover_archivos(arch, os.path.join(main_path, ext))
 
 main_path = obtener_ruta(no_gui=True)
 files = escanear_archivos(path=main_path)
